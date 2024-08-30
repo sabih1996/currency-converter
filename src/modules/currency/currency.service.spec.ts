@@ -13,6 +13,6 @@ describe('CurrencyService', () => {
   });
 
   it('should be defined', () => {
-    expect(service).not.toBeDefined();
+    expect(service).toBeDefined();
   });
 });
