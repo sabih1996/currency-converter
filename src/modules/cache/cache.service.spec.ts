@@ -67,4 +67,16 @@ describe('CacheService', () => {
       expect(redisClientMock.get).toHaveBeenCalledWith('test-key');
     });
   });
+
+  describe('set', () => {
+    it('should set value in Redis with expiry', async () => {
+      redisClientMock.set.mockResolvedValue('OK');
+      await service.set('test-key', 'test-value');
+      expect(redisClientMock.set).toHaveBeenCalledWith(
+        'test-key',
+        'test-value',
+        { EX: 3600 },
+      );
+    });
+  });
 });
