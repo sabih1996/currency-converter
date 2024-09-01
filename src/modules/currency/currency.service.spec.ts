@@ -23,14 +23,16 @@ describe('CurrencyService', () => {
     cacheService = module.get<CacheService>(CacheService);
   });
 
-  it('should generate a CSRF token(32 bytes = 64 hex characters), store it in cache, and return it', async () => {
-    const result = await currencyService.generateToken();
+  describe('Generate token', () => {
+    it('should generate a CSRF token(32 bytes = 64 hex characters), store it in cache, and return it', async () => {
+      const result = await currencyService.generateToken();
 
-    expect(result.csrfToken).toBeDefined();
-    expect(result.csrfToken).toHaveLength(64);
-    expect(cacheService.set).toHaveBeenCalledWith(
-      'csrf-token',
-      result.csrfToken,
-    );
+      expect(result.csrfToken).toBeDefined();
+      expect(result.csrfToken).toHaveLength(64);
+      expect(cacheService.set).toHaveBeenCalledWith(
+        'csrf-token',
+        result.csrfToken,
+      );
+    });
   });
 });
