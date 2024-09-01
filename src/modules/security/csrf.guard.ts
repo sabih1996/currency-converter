@@ -12,13 +12,13 @@ export class CsrfGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    const csrfTokenFromHeader = request.headers['x-csrf-token'] as string;
-    const csrfTokenFromCache = await this.cacheService.get('csrf-token');
+    const tokenFromHeader = request.headers['x-csrf-token'] as string;
+    const tokenFromCache = await this.cacheService.get('csrf-token');
 
-    if (!csrfTokenFromHeader || !csrfTokenFromCache)
+    if (!tokenFromHeader || !tokenFromCache)
       throw BadRequestException('CSRF token is missing.');
 
-    if (csrfTokenFromHeader !== String(csrfTokenFromCache))
+    if (tokenFromHeader !== tokenFromCache)
       throw ForbiddenException('Invalid CSRF token.');
 
     return true;
