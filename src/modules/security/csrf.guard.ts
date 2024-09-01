@@ -1,11 +1,10 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
 import { CacheService } from '../cache/cache.service';
+import {
+  BadRequestException,
+  ForbiddenException,
+} from '../../common/error/exception.service';
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
@@ -17,10 +16,10 @@ export class CsrfGuard implements CanActivate {
     const csrfTokenFromCache = await this.cacheService.get('csrf-token');
 
     if (!csrfTokenFromHeader || !csrfTokenFromCache)
-      throw new ForbiddenException('CSRF token is missing.');
+      throw BadRequestException('CSRF token is missing.');
 
     if (csrfTokenFromHeader !== String(csrfTokenFromCache))
-      throw new ForbiddenException('Invalid CSRF token.');
+      throw ForbiddenException('Invalid CSRF token.');
 
     return true;
   }
