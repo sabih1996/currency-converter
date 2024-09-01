@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorCodes } from '../../enum/error-codes.enum';
+import { ErrorCodes } from '../enum/error-codes.enum';
 
 type CustomExceptionErrorCode = string | ErrorCodes;
 export interface CustomException {
