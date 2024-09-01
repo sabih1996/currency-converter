@@ -1,6 +1,6 @@
 # *CURRENCY CONVERTER*
 
-## Run Test cases
+## Test cases
 ### Run all test cases:
 
 ```
