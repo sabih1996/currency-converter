@@ -1,13 +1,9 @@
-// cache.service.spec.ts
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { CacheService } from './cache.service';
-import { createClient } from 'redis'; // Import the actual redis client
+import { createClient } from 'redis';
 import { BadRequestException } from '../../common/error/exception.service';
 
-// Mock the redis module
 jest.mock('redis', () => ({
-  // Mock the createClient function
   createClient: jest.fn(),
 }));
 
@@ -16,7 +12,6 @@ describe('CacheService', () => {
   let redisClientMock: any;
 
   beforeEach(async () => {
-    // Create a mock Redis client with necessary methods
     redisClientMock = {
       get: jest.fn(),
       set: jest.fn(),
@@ -24,7 +19,6 @@ describe('CacheService', () => {
       on: jest.fn(),
     };
 
-    // Make createClient return the mock Redis client
     (createClient as jest.Mock).mockReturnValue(redisClientMock);
 
     const module: TestingModule = await Test.createTestingModule({
@@ -32,19 +26,21 @@ describe('CacheService', () => {
     }).compile();
 
     service = module.get<CacheService>(CacheService);
+
+    // Call onModuleInit to initialize the redisClient
+    await service.onModuleInit();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('onModuleInit', () => {
+  describe('Initialize redis module', () => {
     it('should connect to Redis client', async () => {
-      await service.onModuleInit();
       expect(redisClientMock.connect).toHaveBeenCalled();
     });
 
-    it('should return  redis client error', async () => {
+    it('should handle redis client error', async () => {
       const error = new Error('Connection error');
       redisClientMock.on.mockImplementation((event, callback) => {
         if (event === 'error') callback(error);
@@ -53,6 +49,22 @@ describe('CacheService', () => {
       await expect(service.onModuleInit()).rejects.toThrow(
         BadRequestException('Redis client error'),
       );
+    });
+  });
+
+  describe('get', () => {
+    it('should return null if key is not found in Redis', async () => {
+      redisClientMock.get.mockResolvedValue(null);
+      const result = await service.get('non-existing-key');
+      expect(result).toBeNull();
+      expect(redisClientMock.get).toHaveBeenCalledWith('non-existing-key');
+    });
+
+    it('should return value from Redis which mateches with test key value', async () => {
+      redisClientMock.get.mockResolvedValue('cached-value');
+      const result = await service.get('test-key');
+      expect(result).toBe('cached-value');
+      expect(redisClientMock.get).toHaveBeenCalledWith('test-key');
     });
   });
 });
