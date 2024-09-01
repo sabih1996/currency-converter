@@ -88,4 +88,23 @@ describe('CsrfGuard Test Cases', () => {
       ForbiddenException('Invalid CSRF token.'),
     );
   });
+
+  it('should return true if CSRF token matches', async () => {
+    // Mock CacheService response
+    (cacheService.get as jest.Mock).mockResolvedValue('valid-token');
+
+    // Create a mock ExecutionContext
+    const context = {
+      switchToHttp: () => ({
+        getRequest: () =>
+          ({
+            headers: {
+              'x-csrf-token': 'valid-token',
+            },
+          }) as unknown as Request,
+      }),
+    } as ExecutionContext;
+
+    await expect(csrfGuard.canActivate(context)).resolves.toBe(true);
+  });
 });
