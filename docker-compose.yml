@@ -14,6 +14,8 @@ services:
       - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - INFLUXDB_DB=${INFLUXDB_DB}
+      - SWOP_API_KEY=${SWOP_API_KEY}
+      - SWOP_API_ENDPOINT=${SWOP_API_ENDPOINT}      
     depends_on:
       - redis
       - influxdb
