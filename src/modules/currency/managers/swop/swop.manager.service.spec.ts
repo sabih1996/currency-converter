@@ -42,4 +42,63 @@ describe('SwopManagerService', () => {
     });
   });
 
+  describe('fetchCurrencies', () => {
+    it('it should return cached currencies if available', async () => {
+      // Mock cacheService to return a valid currencies string
+      cacheServiceMock.get.mockResolvedValueOnce(
+        JSON.stringify(mockCountriesList),
+      );
+
+      const result = await service.fetchCurrencies();
+      expect(result).toEqual(mockCountriesList);
+      expect(cacheServiceMock.get).toHaveBeenCalledWith('legalCurrencies');
+    });
+
+    it('should throw UnauthorizedException if API key is invalid', async () => {
+      cacheServiceMock.get.mockResolvedValueOnce(null);
+
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          ok: false,
+          status: 401,
+          json: () => Promise.reject(new Error('Unauthorized')),
+        } as Response),
+      ) as jest.Mock;
+
+      await expect(service.fetchCurrencies()).rejects.toThrow(
+        UnauthorizedException('Api key invalid'),
+      );
+    });
+
+    it('it should fetch and cache currencies if not available in cache', async () => {
+      // Mock cacheService to return null, simulating cache miss
+      cacheServiceMock.get.mockResolvedValueOnce(null);
+
+      // Mock fetch response
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          json: () => Promise.resolve(mockCountriesList),
+        } as Response),
+      ) as jest.Mock;
+
+      // Mock cacheService.set to check if it's called with correct arguments
+      cacheServiceMock.set.mockResolvedValueOnce(undefined);
+
+      await service.fetchCurrencies();
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${SWOP_API_ENDPOINT}/currencies`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `ApiKey ${SWOP_API_VALID_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      expect(cacheServiceMock.set).toHaveBeenCalledWith(
+        'legalCurrencies',
+        JSON.stringify(mockCountriesList),
+      );
+    });
+  });
 });
