@@ -4,6 +4,7 @@ import { CacheService } from '../cache/cache.service';
 import {
   BadRequestException,
   ForbiddenException,
+  UnauthorizedException,
 } from '../../common/error/exception.service';
 
 @Injectable()
@@ -15,8 +16,9 @@ export class CsrfGuard implements CanActivate {
     const tokenFromHeader = request.headers['x-csrf-token'] as string;
     const tokenFromCache = await this.cacheService.get('csrf-token');
 
-    if (!tokenFromHeader || !tokenFromCache)
-      throw BadRequestException('CSRF token is missing.');
+    if (!tokenFromHeader) throw BadRequestException('CSRF token is missing.');
+
+    if (!tokenFromCache) throw UnauthorizedException('CSRF token expires');
 
     if (tokenFromHeader !== tokenFromCache)
       throw ForbiddenException('Invalid CSRF token.');

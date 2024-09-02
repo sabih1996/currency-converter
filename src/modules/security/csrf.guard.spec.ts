@@ -5,8 +5,14 @@ import { CacheService } from '../cache/cache.service';
 import {
   BadRequestException,
   ForbiddenException,
+  UnauthorizedException,
 } from '../../common/error/exception.service';
 import { Request } from 'express';
+import {
+  BROKEN_CSRF_TOKEN,
+  CSRF_TOKEN_IN_CACHE,
+  VALID_CSRF_TOKEN,
+} from '../../../test/constants/index.constant';
 
 describe('CsrfGuard Test Cases', () => {
   let csrfGuard: CsrfGuard;
@@ -30,7 +36,7 @@ describe('CsrfGuard Test Cases', () => {
 
   it('should throw BadRequestException if CSRF token is missing from headers', async () => {
     // Mock CacheService response
-    (cacheService.get as jest.Mock).mockResolvedValue('valid-token');
+    (cacheService.get as jest.Mock).mockResolvedValue(VALID_CSRF_TOKEN);
 
     // Create a mock ExecutionContext
     const context = {
@@ -47,30 +53,30 @@ describe('CsrfGuard Test Cases', () => {
     );
   });
 
-  it('should throw BadRequestException if CSRF token is missing from cache', async () => {
+  it('should throw UnauthorizedException if CSRF token expires in cache', async () => {
     // Mock CacheService response
     (cacheService.get as jest.Mock).mockResolvedValue(null);
 
-    // Create a mock ExecutionContext
+    // Create a mock ExecutionContext to simulate a request with a broken CSRF token
     const context = {
       switchToHttp: () => ({
         getRequest: () =>
           ({
             headers: {
-              'x-csrf-token': 'some-token',
+              'x-csrf-token': BROKEN_CSRF_TOKEN, // This token does not match the valid one in the cache
             },
           }) as unknown as Request,
       }),
     } as ExecutionContext;
 
     await expect(csrfGuard.canActivate(context)).rejects.toThrow(
-      BadRequestException('CSRF token is missing.'),
+      UnauthorizedException('CSRF token expires'),
     );
   });
 
-  it('should throw ForbiddenException if CSRF token does not match', async () => {
+  it('should throw ForbiddenException if CSRF token does not match with value in cache', async () => {
     // Mock CacheService response
-    (cacheService.get as jest.Mock).mockResolvedValue('valid-token');
+    (cacheService.get as jest.Mock).mockResolvedValue(VALID_CSRF_TOKEN);
 
     // Create a mock ExecutionContext
     const context = {
@@ -78,12 +84,13 @@ describe('CsrfGuard Test Cases', () => {
         getRequest: () =>
           ({
             headers: {
-              'x-csrf-token': 'invalid-token',
+              'x-csrf-token': CSRF_TOKEN_IN_CACHE,
             },
           }) as unknown as Request,
       }),
     } as ExecutionContext;
 
+    // Check that the CsrfGuard throws an UnauthorizedException when the CSRF token has expired
     await expect(csrfGuard.canActivate(context)).rejects.toThrow(
       ForbiddenException('Invalid CSRF token.'),
     );
@@ -91,7 +98,7 @@ describe('CsrfGuard Test Cases', () => {
 
   it('should return true if CSRF token matches', async () => {
     // Mock CacheService response
-    (cacheService.get as jest.Mock).mockResolvedValue('valid-token');
+    (cacheService.get as jest.Mock).mockResolvedValue(VALID_CSRF_TOKEN);
 
     // Create a mock ExecutionContext
     const context = {
@@ -99,7 +106,7 @@ describe('CsrfGuard Test Cases', () => {
         getRequest: () =>
           ({
             headers: {
-              'x-csrf-token': 'valid-token',
+              'x-csrf-token': VALID_CSRF_TOKEN,
             },
           }) as unknown as Request,
       }),
