@@ -4,6 +4,7 @@ type GenerateToken = {
 
 type ConvertCurrency = {
   convertedAmount: number;
+  conversionRate: number;
 };
 
 export { GenerateToken, ConvertCurrency };
