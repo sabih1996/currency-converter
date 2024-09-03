@@ -17,7 +17,7 @@ export class SwopManagerService implements OnModuleInit {
     await Promise.all([this.getEuroExchangeRates(), this.fetchCurrencies()]);
   }
 
-  async fetchCurrencies(): Promise<CurrenciesList[]> {
+  async fetchCurrencies(): Promise<CurrenciesList> {
     //check if no valid currencies values store in redis cache
     const validCurrencies = await this.getCacheValue(
       SwopManager.VALID_CURRENCIES,
@@ -26,8 +26,7 @@ export class SwopManagerService implements OnModuleInit {
     if (validCurrencies) return JSON.parse(validCurrencies);
     const currenciesResponse = await this.fetchSwop('currencies');
     try {
-      const _validCurrencies: CurrenciesList[] =
-        await currenciesResponse.json();
+      const _validCurrencies: CurrenciesList = await currenciesResponse.json();
       await this.setCacheValue(SwopManager.VALID_CURRENCIES, _validCurrencies);
       return _validCurrencies;
     } catch (error: unknown) {
@@ -35,7 +34,7 @@ export class SwopManagerService implements OnModuleInit {
     }
   }
 
-  async getEuroExchangeRates(): Promise<EuroCurrencyExchangeList[]> {
+  async getEuroExchangeRates(): Promise<EuroCurrencyExchangeList> {
     //check if no valid euro exchange rates store in redis cache
     const excahngeRates = await this.getCacheValue(
       SwopManager.EURO_EXCHANGE_RATES,
@@ -44,7 +43,7 @@ export class SwopManagerService implements OnModuleInit {
     if (excahngeRates) return JSON.parse(excahngeRates);
     const swopExhangeRates = await this.fetchSwop('rates');
     try {
-      const _excahngeRates: EuroCurrencyExchangeList[] =
+      const _excahngeRates: EuroCurrencyExchangeList =
         await swopExhangeRates.json();
       await this.setCacheValue(SwopManager.EURO_EXCHANGE_RATES, _excahngeRates);
       return _excahngeRates;
@@ -67,7 +66,7 @@ export class SwopManagerService implements OnModuleInit {
   }
   private async setCacheValue(
     key: string,
-    values: CurrenciesList[] | EuroCurrencyExchangeList[],
+    values: CurrenciesList | EuroCurrencyExchangeList,
   ) {
     await this.cacheService.set(key, JSON.stringify(values));
   }
