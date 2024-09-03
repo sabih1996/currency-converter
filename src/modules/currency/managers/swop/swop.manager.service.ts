@@ -16,7 +16,7 @@ export class SwopManagerService implements OnModuleInit {
 
   async fetchCurrencies() {
     //check if no valid currencies values store in redis cache
-    const validCurrencies = await this.cacheService.get(
+    const validCurrencies = await this.getCacheValue(
       SwopManager.VALID_CURRENCIES,
     );
 
@@ -42,6 +42,9 @@ export class SwopManagerService implements OnModuleInit {
     }
   }
 
+  private async getCacheValue(key: string) {
+    return await this.cacheService.get(key);
+  }
   private async setCacheValue(key: string, values: CurrenciesList[]) {
     await this.cacheService.set(key, JSON.stringify(values));
   }
