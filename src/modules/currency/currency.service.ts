@@ -5,7 +5,8 @@ import { GenerateToken } from '../../common/interfaces/currency.interface';
 import { CurrencyDTO } from './dto/currency.dto';
 import { SwopManagerService } from './managers/swop/swop.manager.service';
 import { BadRequestException } from '../../common/error/exception.service';
-// import { CurrenciesList } from './managers/swop/interfaces/swop.manager.interface';
+import { ConvertCurrency } from '../../common/interfaces/currency.interface';
+
 @Injectable()
 export class CurrencyService {
   constructor(
@@ -19,19 +20,38 @@ export class CurrencyService {
     return { csrfToken };
   }
 
-  async currencyConverter(currencyDto: CurrencyDTO): Promise<any> {
-    const { sourceCurrency, targetCurrency } = currencyDto;
+  async currencyConverter(currencyDto: CurrencyDTO): Promise<ConvertCurrency> {
+    const { sourceCurrency, targetCurrency, amount } = currencyDto;
+
     await Promise.all([
       this.validateInputCurrencies(sourceCurrency),
       this.validateInputCurrencies(targetCurrency),
     ]);
+
+    const [sourceCurrencyToEuro, targetCurrencyToEuro] = await Promise.all([
+      this.getCurrencyExchangeRate(sourceCurrency),
+      this.getCurrencyExchangeRate(targetCurrency),
+    ]);
+    const conversionRate: number =
+      sourceCurrencyToEuro.quote / targetCurrencyToEuro.quote;
+    const convertedAmount: number = amount * conversionRate;
+    return {
+      conversionRate,
+      convertedAmount,
+    };
   }
 
-  private async validateInputCurrencies(currency: string) {
+  private async getCurrencyExchangeRate(currency: string) {
+    return (await this.swopManagerService.getEuroExchangeRates()).find(
+      (exchangeRate) => exchangeRate.quote_currency === currency,
+    );
+  }
+  private async validateInputCurrencies(currency: string): Promise<boolean> {
     const validCurrency = (
       await this.swopManagerService.fetchCurrencies()
     ).some((value) => value.code === currency);
 
     if (!validCurrency) throw BadRequestException('Currency is not valid');
+    return true;
   }
 }

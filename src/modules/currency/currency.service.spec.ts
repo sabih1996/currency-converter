@@ -4,7 +4,7 @@ import { CacheService } from '../cache/cache.service';
 import { SwopManagerService } from './managers/swop/swop.manager.service';
 import * as crypto from 'crypto'; // Import the crypto library to mock
 import { CurrencyDTO } from './dto/currency.dto';
-import { mockCurrenciesList } from '../../../test/data';
+import { mockCurrenciesList, mockEuroExchange } from '../../../test/data';
 import { BadRequestException } from '../../common/error/exception.service';
 
 describe('CurrencyService', () => {
@@ -20,6 +20,7 @@ describe('CurrencyService', () => {
 
     const swopManagerServiceMock = {
       fetchCurrencies: jest.fn(),
+      getEuroExchangeRates: jest.fn(),
     };
 
     // Mock the crypto.randomBytes function
@@ -83,6 +84,24 @@ describe('CurrencyService', () => {
       await expect(
         currencyService.currencyConverter(currencyDto),
       ).rejects.toThrow(BadRequestException('Currency is not valid'));
+    });
+
+    it('it should return the converted value of source currency to euro', async () => {
+      (swopManagerService.fetchCurrencies as jest.Mock).mockResolvedValue(
+        mockCurrenciesList,
+      );
+      (swopManagerService.getEuroExchangeRates as jest.Mock).mockResolvedValue(
+        mockEuroExchange,
+      );
+      const currencyDto: CurrencyDTO = {
+        sourceCurrency: 'USD',
+        targetCurrency: 'PKR',
+        amount: 100,
+      };
+
+      const result = await currencyService.currencyConverter(currencyDto);
+      expect(result).toBeTruthy();
+      expect(result.convertedAmount).toBeCloseTo(0.358, 3);
     });
   });
 });
