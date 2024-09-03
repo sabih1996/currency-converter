@@ -11,7 +11,7 @@ dotenv.config();
 export class SwopManagerService implements OnModuleInit {
   constructor(private cacheService: CacheService) {}
   async onModuleInit() {
-    await this.fetchCurrencies();
+    await Promise.all([this.getEuroExchangeRates(), this.fetchCurrencies()]);
   }
 
   async fetchCurrencies() {
