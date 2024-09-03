@@ -21,19 +21,8 @@ export class SwopManagerService implements OnModuleInit {
     );
 
     if (validCurrencies) return JSON.parse(validCurrencies);
-
+    const currenciesResponse = await this.fetchSwop('currencies');
     try {
-      const currenciesResponse = await fetch(
-        `${process.env.SWOP_API_ENDPOINT}/currencies`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `ApiKey ${process.env.SWOP_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
       const _validCurrencies: CurrenciesList[] =
         await currenciesResponse.json();
       await this.setCacheValue(SwopManager.VALID_CURRENCIES, _validCurrencies);
@@ -42,6 +31,15 @@ export class SwopManagerService implements OnModuleInit {
     }
   }
 
+  private async fetchSwop(extendedUrl: string) {
+    return await fetch(`${process.env.SWOP_API_ENDPOINT}/${extendedUrl}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `ApiKey ${process.env.SWOP_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  }
   private async getCacheValue(key: string) {
     return await this.cacheService.get(key);
   }
