@@ -1,8 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SwopManagerService } from './swop.manager.service';
 import { CacheService } from '../../../cache/cache.service';
-import { mockCountriesList } from '../../../../../test/data/mock-countries.data';
+import {
+  mockCountriesList,
+  mockEuroExchange,
+} from '../../../../../test/data/index';
 import { UnauthorizedException } from '../../../../common/error/exception.service';
+import { SwopManager } from '../../../../common/enum/swop.enum';
 
 describe('SwopManagerService', () => {
   let service: SwopManagerService;
@@ -51,7 +55,9 @@ describe('SwopManagerService', () => {
 
       const result = await service.fetchCurrencies();
       expect(result).toEqual(mockCountriesList);
-      expect(cacheServiceMock.get).toHaveBeenCalledWith('validCurrencies');
+      expect(cacheServiceMock.get).toHaveBeenCalledWith(
+        SwopManager.VALID_CURRENCIES,
+      );
     });
 
     it('should throw UnauthorizedException if API key is invalid', async () => {
@@ -96,8 +102,22 @@ describe('SwopManagerService', () => {
         },
       );
       expect(cacheServiceMock.set).toHaveBeenCalledWith(
-        'validCurrencies',
+        SwopManager.VALID_CURRENCIES,
         JSON.stringify(mockCountriesList),
+      );
+    });
+  });
+  describe('getEuroExchangeRates', () => {
+    it('it should return cached euro exchange rates if available in cache', async () => {
+      // Mock cacheService to return a valid currencies string
+      cacheServiceMock.get.mockResolvedValueOnce(
+        JSON.stringify(mockEuroExchange),
+      );
+
+      const result = await service.getEuroExchangeRates();
+      expect(result).toEqual(mockEuroExchange);
+      expect(cacheServiceMock.get).toHaveBeenCalledWith(
+        SwopManager.EURO_EXCHANGE_RATES,
       );
     });
   });

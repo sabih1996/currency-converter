@@ -31,6 +31,22 @@ export class SwopManagerService implements OnModuleInit {
     }
   }
 
+  async getEuroExchangeRates() {
+    //check if no valid euro exchange rates store in redis cache
+    const excahngeRates = await this.getCacheValue(
+      SwopManager.EURO_EXCHANGE_RATES,
+    );
+
+    if (excahngeRates) return JSON.parse(excahngeRates);
+    const swopExhangeRates = await this.fetchSwop('rates');
+    try {
+      const _excahngeRates: CurrenciesList[] = await swopExhangeRates.json();
+      await this.setCacheValue(SwopManager.EURO_EXCHANGE_RATES, _excahngeRates);
+    } catch (error: unknown) {
+      throw UnauthorizedException('Api key invalid');
+    }
+  }
+
   private async fetchSwop(extendedUrl: string) {
     return await fetch(`${process.env.SWOP_API_ENDPOINT}/${extendedUrl}`, {
       method: 'GET',
