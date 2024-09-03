@@ -2,4 +2,8 @@ type GenerateToken = {
   csrfToken: string;
 };
 
-export { GenerateToken };
+type ConvertCurrency = {
+  convertedAmount: number;
+};
+
+export { GenerateToken, ConvertCurrency };
