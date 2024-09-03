@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CurrencyService } from './currency.service';
 import { CacheService } from '../cache/cache.service';
+import { SwopManagerService } from './managers/swop/swop.manager.service';
+import * as crypto from 'crypto'; // Import the crypto library to mock
 
 describe('CurrencyService', () => {
   let currencyService: CurrencyService;
@@ -12,9 +14,15 @@ describe('CurrencyService', () => {
       set: jest.fn(),
     };
 
+    // Mock the crypto.randomBytes function
+    jest
+      .spyOn(crypto, 'randomBytes')
+      .mockImplementation(() => Buffer.from('a'.repeat(32)));
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CurrencyService,
+        { provide: SwopManagerService, useValue: {} },
         { provide: CacheService, useValue: cacheServiceMock },
       ],
     }).compile();
