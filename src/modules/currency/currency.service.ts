@@ -33,7 +33,7 @@ export class CurrencyService {
       this.getCurrencyExchangeRate(targetCurrency),
     ]);
     const conversionRate: number =
-      sourceCurrencyToEuro.quote / targetCurrencyToEuro.quote;
+      targetCurrencyToEuro.quote / sourceCurrencyToEuro.quote;
     const convertedAmount: number = amount * conversionRate;
     return {
       conversionRate,

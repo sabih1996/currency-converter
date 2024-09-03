@@ -94,8 +94,8 @@ describe('CurrencyService', () => {
         mockEuroExchange,
       );
       const currencyDto: CurrencyDTO = {
-        sourceCurrency: 'USD',
-        targetCurrency: 'PKR',
+        sourceCurrency: 'PKR',
+        targetCurrency: 'USD',
         amount: 100,
       };
 
