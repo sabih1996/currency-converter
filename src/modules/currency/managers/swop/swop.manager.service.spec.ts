@@ -51,7 +51,7 @@ describe('SwopManagerService', () => {
 
       const result = await service.fetchCurrencies();
       expect(result).toEqual(mockCountriesList);
-      expect(cacheServiceMock.get).toHaveBeenCalledWith('legalCurrencies');
+      expect(cacheServiceMock.get).toHaveBeenCalledWith('validCurrencies');
     });
 
     it('should throw UnauthorizedException if API key is invalid', async () => {
@@ -96,7 +96,7 @@ describe('SwopManagerService', () => {
         },
       );
       expect(cacheServiceMock.set).toHaveBeenCalledWith(
-        'legalCurrencies',
+        'validCurrencies',
         JSON.stringify(mockCountriesList),
       );
     });

@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import { CurrenciesList } from './interfaces/swop.manager.interface';
 import { CacheService } from '../../../cache/cache.service';
 import { UnauthorizedException } from '../../../../common/error/exception.service';
+import { SwopManager } from '../../../../common/enum/swop.enum';
 
 dotenv.config();
 
@@ -15,7 +16,9 @@ export class SwopManagerService implements OnModuleInit {
 
   async fetchCurrencies() {
     //check if no valid currencies values store in redis cache
-    const validCurrencies = await this.cacheService.get('legalCurrencies');
+    const validCurrencies = await this.cacheService.get(
+      SwopManager.VALID_CURRENCIES,
+    );
 
     if (validCurrencies) return JSON.parse(validCurrencies);
 
@@ -33,7 +36,7 @@ export class SwopManagerService implements OnModuleInit {
 
       const _validCurrencies: CurrenciesList[] =
         await currenciesResponse.json();
-      await this.setCacheValue('legalCurrencies', _validCurrencies);
+      await this.setCacheValue(SwopManager.VALID_CURRENCIES, _validCurrencies);
     } catch (error: unknown) {
       throw UnauthorizedException('Api key invalid');
     }
