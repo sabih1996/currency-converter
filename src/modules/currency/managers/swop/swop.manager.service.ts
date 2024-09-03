@@ -1,6 +1,9 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as dotenv from 'dotenv';
-import { CurrenciesList } from './interfaces/swop.manager.interface';
+import {
+  CurrenciesList,
+  EuroCurrencyExchangeList,
+} from './interfaces/swop.manager.interface';
 import { CacheService } from '../../../cache/cache.service';
 import { UnauthorizedException } from '../../../../common/error/exception.service';
 import { SwopManager } from '../../../../common/enum/swop.enum';
@@ -14,7 +17,7 @@ export class SwopManagerService implements OnModuleInit {
     await Promise.all([this.getEuroExchangeRates(), this.fetchCurrencies()]);
   }
 
-  async fetchCurrencies() {
+  async fetchCurrencies(): Promise<CurrenciesList[]> {
     //check if no valid currencies values store in redis cache
     const validCurrencies = await this.getCacheValue(
       SwopManager.VALID_CURRENCIES,
@@ -26,12 +29,13 @@ export class SwopManagerService implements OnModuleInit {
       const _validCurrencies: CurrenciesList[] =
         await currenciesResponse.json();
       await this.setCacheValue(SwopManager.VALID_CURRENCIES, _validCurrencies);
+      return _validCurrencies;
     } catch (error: unknown) {
       throw UnauthorizedException('Api key invalid');
     }
   }
 
-  async getEuroExchangeRates() {
+  async getEuroExchangeRates(): Promise<EuroCurrencyExchangeList[]> {
     //check if no valid euro exchange rates store in redis cache
     const excahngeRates = await this.getCacheValue(
       SwopManager.EURO_EXCHANGE_RATES,
@@ -40,8 +44,10 @@ export class SwopManagerService implements OnModuleInit {
     if (excahngeRates) return JSON.parse(excahngeRates);
     const swopExhangeRates = await this.fetchSwop('rates');
     try {
-      const _excahngeRates: CurrenciesList[] = await swopExhangeRates.json();
+      const _excahngeRates: EuroCurrencyExchangeList[] =
+        await swopExhangeRates.json();
       await this.setCacheValue(SwopManager.EURO_EXCHANGE_RATES, _excahngeRates);
+      return _excahngeRates;
     } catch (error: unknown) {
       throw UnauthorizedException('Api key invalid');
     }
@@ -59,7 +65,10 @@ export class SwopManagerService implements OnModuleInit {
   private async getCacheValue(key: string) {
     return await this.cacheService.get(key);
   }
-  private async setCacheValue(key: string, values: CurrenciesList[]) {
+  private async setCacheValue(
+    key: string,
+    values: CurrenciesList[] | EuroCurrencyExchangeList[],
+  ) {
     await this.cacheService.set(key, JSON.stringify(values));
   }
 }

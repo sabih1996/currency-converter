@@ -1,6 +1,6 @@
 import { CurrenciesList } from '../../src/modules/currency/managers/swop/interfaces/swop.manager.interface';
 
-const mockCountriesList: CurrenciesList = [
+const mockCurrenciesList: CurrenciesList = [
   {
     code: 'AED',
     numeric_code: '784',
@@ -1060,4 +1060,4 @@ const mockCountriesList: CurrenciesList = [
   },
 ];
 
-export { mockCountriesList };
+export { mockCurrenciesList };

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SwopManagerService } from './swop.manager.service';
 import { CacheService } from '../../../cache/cache.service';
 import {
-  mockCountriesList,
+  mockCurrenciesList,
   mockEuroExchange,
 } from '../../../../../test/data/index';
 import { UnauthorizedException } from '../../../../common/error/exception.service';
@@ -50,11 +50,11 @@ describe('SwopManagerService', () => {
     it('it should return cached currencies if available', async () => {
       // Mock cacheService to return a valid currencies string
       cacheServiceMock.get.mockResolvedValueOnce(
-        JSON.stringify(mockCountriesList),
+        JSON.stringify(mockCurrenciesList),
       );
 
       const result = await service.fetchCurrencies();
-      expect(result).toEqual(mockCountriesList);
+      expect(result).toEqual(mockCurrenciesList);
       expect(cacheServiceMock.get).toHaveBeenCalledWith(
         SwopManager.VALID_CURRENCIES,
       );
@@ -83,14 +83,14 @@ describe('SwopManagerService', () => {
       // Mock fetch response
       global.fetch = jest.fn(() =>
         Promise.resolve({
-          json: () => Promise.resolve(mockCountriesList),
+          json: () => Promise.resolve(mockCurrenciesList),
         } as Response),
       ) as jest.Mock;
 
       // Mock cacheService.set to check if it's called with correct arguments
       cacheServiceMock.set.mockResolvedValueOnce(undefined);
 
-      await service.fetchCurrencies();
+      const result = await service.fetchCurrencies();
       expect(global.fetch).toHaveBeenCalledWith(
         `${SWOP_API_ENDPOINT}/currencies`,
         {
@@ -103,8 +103,9 @@ describe('SwopManagerService', () => {
       );
       expect(cacheServiceMock.set).toHaveBeenCalledWith(
         SwopManager.VALID_CURRENCIES,
-        JSON.stringify(mockCountriesList),
+        JSON.stringify(mockCurrenciesList),
       );
+      expect(result).toEqual(mockCurrenciesList);
     });
   });
   describe('getEuroExchangeRates', () => {
@@ -151,7 +152,7 @@ describe('SwopManagerService', () => {
       // Used to simulate the behavior of the set method so that it returns a resolved promise with undefined as the value, but only for this specific call.
       cacheServiceMock.set.mockResolvedValueOnce(undefined);
 
-      await service.getEuroExchangeRates();
+      const result = await service.getEuroExchangeRates();
       expect(global.fetch).toHaveBeenCalledWith(`${SWOP_API_ENDPOINT}/rates`, {
         method: 'GET',
         headers: {
@@ -163,6 +164,7 @@ describe('SwopManagerService', () => {
         SwopManager.EURO_EXCHANGE_RATES,
         JSON.stringify(mockEuroExchange),
       );
+      expect(result).toEqual(mockEuroExchange);
     });
   });
 });
