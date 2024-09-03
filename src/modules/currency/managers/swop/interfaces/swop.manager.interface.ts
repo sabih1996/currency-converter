@@ -8,4 +8,13 @@ type ValidCurrency = {
   active: boolean;
 };
 
-export { CurrenciesList };
+type EuroCurrencyExchangeList = EuroCurrencyExchange[];
+
+type EuroCurrencyExchange = {
+  base_currency: string;
+  quote_currency: string;
+  quote: number;
+  date: string;
+};
+
+export { CurrenciesList, EuroCurrencyExchangeList };
