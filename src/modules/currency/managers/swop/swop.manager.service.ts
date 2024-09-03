@@ -33,16 +33,13 @@ export class SwopManagerService implements OnModuleInit {
 
       const _validCurrencies: CurrenciesList[] =
         await currenciesResponse.json();
-      await this.saveValidCurrencies(_validCurrencies);
+      await this.setCacheValue('legalCurrencies', _validCurrencies);
     } catch (error: unknown) {
       throw UnauthorizedException('Api key invalid');
     }
   }
 
-  private async saveValidCurrencies(validCurrencies: CurrenciesList[]) {
-    await this.cacheService.set(
-      'legalCurrencies',
-      JSON.stringify(validCurrencies),
-    );
+  private async setCacheValue(key: string, values: CurrenciesList[]) {
+    await this.cacheService.set(key, JSON.stringify(values));
   }
 }
