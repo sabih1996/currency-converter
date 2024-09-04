@@ -10,6 +10,7 @@ This project is a NestJS-based application that provides a currency conversion A
 4. Environment Variables (.env)
 5. Running Test Cases
 6. API Endpoints
+7. Documentation
 
 ## Prerequisites
 
@@ -132,6 +133,7 @@ $ npm run test:watch file_name
 ## API Endpoints
 
 ### Currency Conversion
+
 - Endpoint: /currency/convert
 - Method: GET
 - Parameters:
@@ -139,15 +141,27 @@ $ npm run test:watch file_name
   - targetCurrency: The currency code you want to convert to (e.g., EUR).
   - amount: The amount of sourceCurrency to convert.
 - Example:
+
 ```bash
 curl "http://localhost:3000/currency/convert?sourceCurrency=USD&targetCurrency=EUR&amount=100"
 ```
+
 ### CSRF Token Generation
+
 - Endpoint: /security/csrf-token
 - Method: GET
 - Description: This endpoint generates a CSRF token that must be included in subsequent API requests.
 
+## Documentation
+
+#### For Api documentation see swagger by hitting following endpoint:
+
+```
+http://localhost:3000/api
+```
+
 ## Troubleshooting
+
 If you encounter any issues:
 
 - Ensure that Redis is running and accessible at the configured host and port.
