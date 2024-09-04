@@ -153,3 +153,4 @@ If you encounter any issues:
 - Ensure that Redis is running and accessible at the configured host and port.
 - Verify that all environment variables are correctly set in the .env file.
 - Check Docker logs using docker-compose logs for detailed error messages.
+- Before commiting any code make sure you write all test cases otherwise husky pre-commit will stop your code for commit if any test suite fails
