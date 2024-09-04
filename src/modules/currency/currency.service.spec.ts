@@ -6,11 +6,13 @@ import * as crypto from 'crypto'; // Import the crypto library to mock
 import { CurrencyDTO } from './dto/currency.dto';
 import { mockCurrenciesList, mockEuroExchange } from '../../../test/data';
 import { BadRequestException } from '../../common/error/exception.service';
+import { LocaleManagerService } from './managers/locale/locale.service';
 
 describe('CurrencyService', () => {
   let currencyService: CurrencyService;
   let cacheService: CacheService;
   let swopManagerService: SwopManagerService;
+  let localeManagerService: LocaleManagerService;
 
   beforeEach(async () => {
     // Create a mock CacheService
@@ -23,6 +25,9 @@ describe('CurrencyService', () => {
       getEuroExchangeRates: jest.fn(),
     };
 
+    const localeManagerServiceMock = {
+      getLocale: jest.fn(),
+    };
     // Mock the crypto.randomBytes function
     jest
       .spyOn(crypto, 'randomBytes')
@@ -33,12 +38,15 @@ describe('CurrencyService', () => {
         CurrencyService,
         { provide: SwopManagerService, useValue: swopManagerServiceMock },
         { provide: CacheService, useValue: cacheServiceMock },
+        { provide: LocaleManagerService, useValue: localeManagerServiceMock },
       ],
     }).compile();
 
     currencyService = module.get<CurrencyService>(CurrencyService);
     cacheService = module.get<CacheService>(CacheService);
     swopManagerService = module.get<SwopManagerService>(SwopManagerService);
+    localeManagerService =
+      module.get<LocaleManagerService>(LocaleManagerService);
   });
 
   describe('Generate token', () => {
@@ -86,22 +94,25 @@ describe('CurrencyService', () => {
       ).rejects.toThrow(BadRequestException('Currency is not valid'));
     });
 
-    it('it should return the converted value of source currency to euro', async () => {
+    it('should convert currency and format the amount according to the locale', async () => {
       (swopManagerService.fetchCurrencies as jest.Mock).mockResolvedValue(
         mockCurrenciesList,
       );
       (swopManagerService.getEuroExchangeRates as jest.Mock).mockResolvedValue(
         mockEuroExchange,
       );
+      (localeManagerService.getLocale as jest.Mock).mockResolvedValue('eng-US'); // Example locale for Germany
+
       const currencyDto: CurrencyDTO = {
-        sourceCurrency: 'PKR',
-        targetCurrency: 'USD',
+        sourceCurrency: 'USD',
+        targetCurrency: 'EUR',
         amount: 100,
       };
 
       const result = await currencyService.currencyConverter(currencyDto);
-      expect(result).toBeTruthy();
-      expect(result.convertedAmount).toBeCloseTo(0.358, 3);
+
+      expect(result.conversionRate).toBeCloseTo(0.9091);
+      expect(result.convertedAmount).toBeTruthy();
     });
   });
 });

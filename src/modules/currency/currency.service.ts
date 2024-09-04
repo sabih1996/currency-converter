@@ -6,12 +6,14 @@ import { CurrencyDTO } from './dto/currency.dto';
 import { SwopManagerService } from './managers/swop/swop.manager.service';
 import { BadRequestException } from '../../common/error/exception.service';
 import { ConvertCurrency } from '../../common/interfaces/currency.interface';
+import { LocaleManagerService } from './managers/locale/locale.service';
 
 @Injectable()
 export class CurrencyService {
   constructor(
     private readonly cacheService: CacheService,
     private readonly swopManagerService: SwopManagerService,
+    private readonly localeManagerService: LocaleManagerService,
   ) {}
 
   async generateToken(): Promise<GenerateToken> {
@@ -35,12 +37,25 @@ export class CurrencyService {
     const conversionRate: number =
       targetCurrencyToEuro.quote / sourceCurrencyToEuro.quote;
     const convertedAmount: number = amount * conversionRate;
+    const locale = await this.getLocale(targetCurrency);
     return {
       conversionRate,
-      convertedAmount,
+      convertedAmount: Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: targetCurrency,
+      }).format(convertedAmount),
     };
   }
 
+  private async getLocale(currency: string) {
+    if (currency === 'EUR') return 'de-DE';
+    const currencyExchangeRate = (
+      await this.swopManagerService.fetchCurrencies()
+    ).find((_currency) => _currency.code === currency);
+    return await this.localeManagerService.getLocale(
+      Number(currencyExchangeRate.numeric_code),
+    );
+  }
   private async getCurrencyExchangeRate(currency: string) {
     return (await this.swopManagerService.getEuroExchangeRates()).find(
       (exchangeRate) => exchangeRate.quote_currency === currency,
@@ -52,6 +67,6 @@ export class CurrencyService {
     ).some((value) => value.code === currency);
 
     if (!validCurrency) throw BadRequestException('Currency is not valid');
-    return true;
+    return validCurrency;
   }
 }

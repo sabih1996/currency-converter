@@ -3,7 +3,7 @@ type GenerateToken = {
 };
 
 type ConvertCurrency = {
-  convertedAmount: number;
+  convertedAmount: string;
   conversionRate: number;
 };
 
