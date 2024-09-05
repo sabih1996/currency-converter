@@ -15,7 +15,7 @@ services:
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - INFLUXDB_DB=${INFLUXDB_DB}
       - SWOP_API_KEY=${SWOP_API_KEY}
-      - SWOP_API_ENDPOINT=${SWOP_API_ENDPOINT}      
+      - SWOP_API_ENDPOINT=${SWOP_API_ENDPOINT}
     depends_on:
       - redis
       - influxdb
@@ -28,14 +28,30 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     command: redis-server ${REDIS_PASSWORD:+--requirepass ${REDIS_PASSWORD}} # Only set requirepass if REDIS_PASSWORD is set
 
-
   influxdb:
     image: influxdb:2.0
+    container_name: influx
     ports:
       - '8086:8086'
+    volumes:
+      - influxdb-data:/var/lib/influxdb
     environment:
       - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - INFLUXDB_DB=${INFLUXDB_DB}
 
-  
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3002:3000"
+    depends_on:
+      - influxdb
+    environment:                                            
+      - GF_SECURITY_ADMIN_PASSWORD=adminpassword
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  influxdb-data:
+  grafana-data:
