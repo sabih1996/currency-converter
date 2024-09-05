@@ -100,6 +100,10 @@ REDIS_PASSWORD=
 INFLUXDB_ADMIN_USER=
 INFLUXDB_ADMIN_PASSWORD=
 INFLUXDB_DB=
+INFLUX_ORG=
+INFLUXDB_BUCKET=
+INFLUX_URL=
+INFLUX_TOKEN=
 
 # SWOP Configuration
 SWOP_API_KEY=
@@ -214,6 +218,7 @@ docker push <aws_account_id>.dkr.ecr.<aws-region>.amazonaws.com/your-app-name:la
   - **Image:** Use the image URL from Docker Hub or ECR (e.g., your-username/your-app-name:latest or <aws_account_id>.dkr.ecr.<aws-region>.amazonaws.com/your-app-name:latest).
   - **Memory and CPU:** Allocate memory and CPU according to your application's needs.
   - **Port Mappings:** Map port 3000 on the container to port 80 (or another port) on the host if you'd like to expose the application.
+
 3. **Create an ECS Service:**
 
 - Go to the ECS Services section and create a new service within your cluster.
@@ -225,9 +230,11 @@ docker push <aws_account_id>.dkr.ecr.<aws-region>.amazonaws.com/your-app-name:la
 
 - Once the service is created, ECS will automatically deploy the container using the image from Docker Hub or ECR.
 - You can monitor the deployment status in the ECS dashboard.
+
 5. **Access Your Application:** After deployment, ECS will assign a public IP address or DNS name to your running task. You can access your application using this public endpoint (e.g., `http://<public-ip>:80`).
 
 #### Step 5: Monitor and Scale the Deployment
+
 - **ECS Scaling:** You can configure auto-scaling for your ECS service to adjust the number of running tasks based on CPU/memory usage or other metrics.
 - **CloudWatch Logs:** Monitor your application logs in CloudWatch by configuring your task definition to forward logs to CloudWatch.
 - **Health Checks:** Set up health checks in your ECS service to ensure that your containers are healthy and automatically replaced if they fail.
