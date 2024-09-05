@@ -7,6 +7,7 @@ import { CurrencyDTO } from './dto/currency.dto';
 import { mockCurrenciesList, mockEuroExchange } from '../../../test/data';
 import { BadRequestException } from '../../common/error/exception.service';
 import { LocaleManagerService } from './managers/locale/locale.service';
+import { InfluxService } from '../logging/influx.service';
 
 describe('CurrencyService', () => {
   let currencyService: CurrencyService;
@@ -28,6 +29,10 @@ describe('CurrencyService', () => {
     const localeManagerServiceMock = {
       getLocale: jest.fn(),
     };
+
+    const influxServiceMock = {
+      logConversion: jest.fn(),
+    };
     // Mock the crypto.randomBytes function
     jest
       .spyOn(crypto, 'randomBytes')
@@ -36,6 +41,7 @@ describe('CurrencyService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CurrencyService,
+        { provide: InfluxService, useValue: influxServiceMock },
         { provide: SwopManagerService, useValue: swopManagerServiceMock },
         { provide: CacheService, useValue: cacheServiceMock },
         { provide: LocaleManagerService, useValue: localeManagerServiceMock },
