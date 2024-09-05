@@ -7,6 +7,7 @@ import { SwopManagerService } from './managers/swop/swop.manager.service';
 import { BadRequestException } from '../../common/error/exception.service';
 import { ConvertCurrency } from '../../common/interfaces/currency.interface';
 import { LocaleManagerService } from './managers/locale/locale.service';
+import { InfluxService } from '../logging/influx.service';
 
 @Injectable()
 export class CurrencyService {
@@ -14,6 +15,7 @@ export class CurrencyService {
     private readonly cacheService: CacheService,
     private readonly swopManagerService: SwopManagerService,
     private readonly localeManagerService: LocaleManagerService,
+    private influxService: InfluxService,
   ) {}
 
   async generateToken(): Promise<GenerateToken> {
@@ -38,6 +40,11 @@ export class CurrencyService {
       targetCurrencyToEuro.quote / sourceCurrencyToEuro.quote;
     const convertedAmount: number = amount * conversionRate;
     const locale = await this.getLocale(targetCurrency);
+    this.influxService.logConversion(
+      sourceCurrency,
+      targetCurrency,
+      convertedAmount,
+    );
     return {
       conversionRate,
       convertedAmount: Intl.NumberFormat(locale, {

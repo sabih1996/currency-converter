@@ -22,6 +22,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@influxdata/influxdb-client": "^1.35.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",

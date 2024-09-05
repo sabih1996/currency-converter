@@ -4,6 +4,7 @@ import { CurrencyController } from './currency.controller';
 import { CacheService } from '../cache/cache.service';
 import { SwopManagerService } from './managers/swop/swop.manager.service';
 import { LocaleManagerService } from './managers/locale/locale.service';
+import { InfluxService } from '../logging/influx.service';
 
 @Module({
   controllers: [CurrencyController],
@@ -12,6 +13,7 @@ import { LocaleManagerService } from './managers/locale/locale.service';
     CacheService,
     SwopManagerService,
     LocaleManagerService,
+    InfluxService,
   ],
   exports: [CurrencyService],
 })
