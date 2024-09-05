@@ -8,8 +8,9 @@ This project is a NestJS-based application that provides a currency conversion A
 2. Setup and Run with Docker
 3. Manual Setup and Run without Docker
 4. Deployment to production
-5. API Endpoints
-6. Documentation
+5. InfluxDB and Grafana Integration
+6. API Endpoints
+7. Documentation
 
 ## Prerequisites
 
@@ -238,6 +239,84 @@ docker push <aws_account_id>.dkr.ecr.<aws-region>.amazonaws.com/your-app-name:la
 - **ECS Scaling:** You can configure auto-scaling for your ECS service to adjust the number of running tasks based on CPU/memory usage or other metrics.
 - **CloudWatch Logs:** Monitor your application logs in CloudWatch by configuring your task definition to forward logs to CloudWatch.
 - **Health Checks:** Set up health checks in your ECS service to ensure that your containers are healthy and automatically replaced if they fail.
+
+## InfluxDB and Grafana Integration
+
+This project includes logging for currency conversions using InfluxDB, and you can monitor the data with Grafana dashboards. Below are the instructions to set up InfluxDB and Grafana.
+
+#### Step 1: InfluxDB Setup
+
+InfluxDB is used to log the currency conversion events. The service will write the data into a specified InfluxDB bucket.
+
+Ensure the following environment variables are configured in your `.env` file:
+
+```env
+# InfluxDB Configuration
+INFLUXDB_ADMIN_USER=<your-influxdb-admin-user>
+INFLUXDB_ADMIN_PASSWORD=<your-influxdb-admin-password>
+INFLUXDB_DB=currencydb
+INFLUX_ORG=<your-organization>
+INFLUXDB_BUCKET=currencydb
+INFLUX_URL=http://influxdb:8086
+INFLUX_TOKEN=<your-influxdb-token>
+```
+These variables will allow the application to connect to your InfluxDB instance and log data for monitoring purposes.
+
+#### Step 2: Grafana Setup
+Grafana is used to visualize and monitor the data logged in InfluxDB.
+
+Run Grafana with Docker:
+
+1. If you are using Docker Compose, you can add the following service definition to your `docker-compose.yml` file to start Grafana:
+
+```
+grafana:
+  image: grafana/grafana:latest
+  ports:
+    - "3002:3000"
+  environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+  volumes:
+    - grafana-storage:/var/lib/grafana
+```
+This will start Grafana on port 3002. You can access it at http://localhost:3002.
+
+2. Add InfluxDB as a Data Source in Grafana:
+
+- Log in to the Grafana dashboard (default credentials: admin/admin).
+- Navigate to Configuration (gear icon) > Data Sources > Add Data Source.
+- Select InfluxDB.
+- Configure the following settings:
+  - URL: `http://influxdb:8086`
+  - Token: Use the token you set in the `.env` file.
+  - Organization: `<your-organization>`
+  - Bucket: `currencydb`
+- Set the query language to Flux.
+3. Create a Dashboard:
+
+- After adding the InfluxDB data source, you can create a new dashboard by  navigating to Create > Dashboard.
+
+- Add a new panel and write a Flux query to visualize the data. Here's an example query to inspect currency conversion data:
+
+```flux
+from(bucket: "currencydb")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "currency_conversion")
+  |> filter(fn: (r) => r["_field"] == "amount")
+  |> aggregateWindow(every: 1m, fn: mean)
+  |> yield(name: "mean_amount")
+```
+- Select your preferred visualization type (e.g., graph, table) and customize the panel settings as needed.
+
+4. Save the Dashboard:
+
+- After creating the dashboard, save it to monitor currency conversion logs in real-time.
+
+With these steps, you will have InfluxDB collecting logs and Grafana displaying them on a dashboard for real-time monitoring and analytics.
+
+```css
+This section will guide users through the setup of InfluxDB for logging currency conversions and using Grafana to visualize the data. Adjust the placeholders with your actual configuration details.
+```
 
 ## API Endpoints
 
