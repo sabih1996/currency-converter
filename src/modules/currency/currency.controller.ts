@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CurrencyService } from './currency.service';
 import { CsrfGuard } from '../security/csrf.guard';
 import { CurrencyDTO } from './dto/currency.dto';
@@ -13,9 +13,9 @@ export class CurrencyController {
     return await this.currencyService.generateToken();
   }
 
-  @Get('converter')
+  @Post('converter')
   @UseGuards(CsrfGuard, CspGuard)
-  async currencyConverter(@Query() currencyDto: CurrencyDTO) {
+  async currencyConverter(@Body() currencyDto: CurrencyDTO) {
     return await this.currencyService.currencyConverter(currencyDto);
   }
 }

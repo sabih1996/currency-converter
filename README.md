@@ -336,8 +336,8 @@ curl "http://localhost:3000/currency/convert?sourceCurrency=USD&targetCurrency=E
 
 ### CSRF Token Generation
 
-- **Endpoint:** /security/csrf-token
-- **Method:** GET
+- **Endpoint:** /currency/csrf-token
+- **Method:** POST
 - **Description:** This endpoint generates a CSRF token that must be included in subsequent API requests.
 
 ## Documentation
